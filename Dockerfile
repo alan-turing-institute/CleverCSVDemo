@@ -1,7 +1,7 @@
-FROM python:3.7-slim
+FROM python:3.7-alpine
 
 RUN apt-get update && \
-	apt-get install -y --no-install-recommends git build-essential
+	apt-get install -y --no-install-recommends git
 
 RUN pip install --no-cache --upgrade pip && \
 	pip install --no-cache notebook poetry requests
