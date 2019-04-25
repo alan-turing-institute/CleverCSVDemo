@@ -1,6 +1,6 @@
-FROM python:3.7-alpine
+FROM python:3.7-slim
 
-RUN apk add --no-cache --virtual git
+RUN apt-get install -y --no-install-recommends git gcc
 
 RUN pip install --no-cache --upgrade pip && \
 	pip install --no-cache notebook poetry requests
