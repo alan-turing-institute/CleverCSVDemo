@@ -15,8 +15,13 @@ RUN adduser --disabled-password \
 	--gecos "Default user" \
 	--uid ${NB_UID} \
 	${NB_USER}
+
+COPY . ${HOME}
+USER root
+RUN chown -R ${NB_UID} ${HOME}
+USER ${NB_USER}
+
 WORKDIR ${HOME}
-USER ${USER}
 
 RUN git clone https://github.com/alan-turing-institute/CleverCSV && \
 	cd CleverCSV/python && poetry install
