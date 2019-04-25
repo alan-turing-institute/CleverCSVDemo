@@ -1,5 +1,7 @@
 # CleverCSV Demonstration
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alan-turing-institute/CleverCSVDemo/master?filepath=CSV_dialect_detection_with_CleverCSV.ipynb)
+
 This repository contains a demonstration of CleverCSV, a Python package for 
 robust handling of non-standard (*messy*) CSV files. It is based on the work 
 [**Wrangling Messy CSV Files by Detecting Row and Type 
