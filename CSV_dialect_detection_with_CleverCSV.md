@@ -85,9 +85,10 @@ df
 ## Other Examples
 
 We'll compare CleverCSV to the built-in Python CSV module and to Pandas and 
-show how these are not as robust as CleverCSV. These files are of course 
-selected for this tutorial, because it wouldn't be very interesting to show 
-files where both methods are correct.
+show how these are not as robust as CleverCSV. Note that Pandas always uses 
+the comma as separator, unless it is forced to autodetect the dialect. These 
+files are of course selected for this tutorial, because it wouldn't be very 
+interesting to show files where both methods are correct.
 
 The example CSV files all come from MIT-licensed GitHub repositories, and the 
 URLs point directly to the source files.
@@ -125,8 +126,9 @@ def sniff_url(content):
         dialect = csv.Sniffer().sniff(content)
         print("CSV Sniffer detected: delimiter = %r, quotechar = %r" % (dialect.delimiter,
                                                                         dialect.quotechar))
-    except csv.Error:
+    except csv.Error as err:
         print(colored("No result from the Python CSV Sniffer", "red"))
+        print(colored("Error was: %s" % err, "red"))
 
 def detect_url(content, verbose=True):
     """ Utility to run the CleverCSV detector on a CSV file at a URL """
@@ -141,21 +143,13 @@ def detect_url(content, verbose=True):
 def pandas_url(content):
     """ Wrapper around pandas.read_csv(). """
     buf = io.StringIO(content)
-    try:
-        # by default, this is what pandas.read_csv does to detect the delimiter
-        # this is incorrect, only when read_csv(sep=None) will pandas detect
-        dialect = csv.Sniffer().sniff(buf.readline())
-    except csv.Error:
-        print(colored("Error occurred sniffing the dialect", "red"))
-        return
     print(
-        "Pandas detected: delimiter = %r, quotechar = %r"
-        % (dialect.delimiter, '"')
+        "Pandas uses: delimiter = %r, quotechar = %r"
+        % (',', '"')
     )
-    buf.seek(0)
     try:
         df = pd.read_csv(buf)
-        display(df)
+        display(df.head())
     except pd.errors.ParserError:
         print(colored("ParserError from pandas.", "red"))
 
