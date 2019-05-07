@@ -35,7 +35,7 @@ titles01/tt0017925,tt0017925,Der General (1926),der general,http://www.imdb.com/
 titles01/tt0021749,tt0021749,Lichter der Großstadt (1931),lichter der gro stadt,http://www.imdb.com/title/tt0021749/,8.7,70057,5220,1931,video.movie,2,0,38,187,186,3,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
 ```
 
-Let's load it with Pandas!
+Seems pretty standard, let's load it with Pandas!
 
 ```python
 %xmode Minimal
@@ -80,25 +80,39 @@ df = csv2df('./data/imdb.csv')
 df
 ```
 
-🎉
+Hooray! 🎉
+
+How does it work? CleverCSV searches the space of all possible dialects of a 
+file, and computes a *data consistency measure* that quantifies how much the 
+resulting table "looks like real data". The consistency measure combines 
+patterns of row lengths in the parsing result and the data type of the 
+resulting cells.  This mimicks how a human would identify the dialect. If 
+you're wondering why this problem is hard, it's because every dialect will 
+give you *some* table, but not necessarily the correct one. More details can 
+be found [in the paper](https://arxiv.org/abs/1811.11242).
 
 ## Other Examples
 
 We'll compare CleverCSV to the built-in Python CSV module and to Pandas and 
 show how these are not as robust as CleverCSV. Note that Pandas always uses 
-the comma as separator, unless it is forced to autodetect the dialect. These 
-files are of course selected for this tutorial, because it wouldn't be very 
-interesting to show files where both methods are correct.
+the comma as separator, unless it is forced to autodetect the dialect, in 
+which case it uses the Python Sniffer on the first line (we don't show that 
+here).  These files are of course selected for this tutorial, because it 
+wouldn't be very interesting to show files where all methods are correct.
 
-The example CSV files all come from MIT-licensed GitHub repositories, and the 
-URLs point directly to the source files.
+Some files come from the [UK's open government data portal](data.gov.uk) (see 
+[the repo for 
+sources](https://github.com/alan-turing-institute/CleverCSVDemo/tree/master/data)), 
+whereas others come from MIT-licensed GitHub repositories (the URLs point 
+directly to the source files).
 
-First we'll define some functions for easy comparisons.
+We'll define some functions for easy comparisons.
 
 ```python
 import csv
 import ccsv
 import io
+import os
 import requests
 import pandas as pd
 
@@ -154,8 +168,12 @@ def pandas_url(content):
         print(colored("ParserError from pandas.", "red"))
 
 
-def compare(url, verbose=False, n_preview=10):
-    content = page(url)
+def compare(input_, verbose=False, n_preview=10):
+    if os.path.exists(input_):
+      enc = ccsv.utils.get_encoding(input_)
+      content = open(input_, 'r', newline='', encoding=enc).read()
+    else:
+      content = page(input_)
     head(content, num=n_preview)
     print("\n1. Running Python Sniffer")
     sniff_url(content)
@@ -165,83 +183,52 @@ def compare(url, verbose=False, n_preview=10):
     detect_url(content, verbose=verbose)
 ```
 
+### Numbers with comma for decimal point
 
-## Example 1: No output from Python Sniffer
+```python
+compare('./data/airedale.csv', n_preview=5)
+```
 
-The first file we'll look at is a simple CSV file that uses the semicolon as delimiter. 
+You'll notice that Python Sniffer says ``.`` is the delimiter, Pandas is 
+correct because the file uses the default comma as separator, and CleverCSV 
+detects the dialect correctly as well.
 
+### Tab-separated
+
+```python
+compare('./data/milk.csv', n_preview=5)
+```
+
+Sniffer and Pandas are incorrect here, but CleverCSV gets it right.
+
+### File with comments
+
+The Python Sniffer gives no result for this file, and Pandas fails because it 
+checks for a rectangular table shape.  Note that the text in the comments says 
+that the file uses ``|`` as separator, even though it actually uses ``,``!
+
+```python
+compare("https://raw.githubusercontent.com/queq/just-stuff/c1b8714664cc674e1fc685bd957eac548d636a43/pov/TopFixed/build/project_r_pad.csv", n_preview=30)
+```
+
+### Semi-colon separated
 
 ```python
 compare("https://raw.githubusercontent.com/grezesf/Research/17b1e829d1d4b8954661270bd8b099e74bb45ce7/Reservoirs/Task0_Replication/code/preprocessing/factors.csv")
 ```
 
-As we can see, the Python CSV sniffer fails on this one, even though the 
-formatting doesn't seem to be that uncommon. CleverCSV handles this file 
-correctly.
+Sniffer fails outright, Pandas is incorrect because it assumes comma.
 
-## Example 2: Incorrect output from Python Sniffer
-
-The next example is quite a long file with a lot of potential delimiters. In 
-total, CleverCSV considers 180 different dialects on this file and determines 
-the best dialect by computing a pattern score and a type score. The pattern 
-score is related to how many cells we have per row given a certain dialect, 
-and the type score reflects whether the cells in the parsed file have known 
-data types (such as integer, date, string, etc.). 
-
-If you want to see the output of CleverCSV while it runs the detection, you 
-can set ``verbose=True`` in the next line.
+### File with multiple tables
 
 ```python
-compare("https://raw.githubusercontent.com/agh-glk/pyconpl2013-nlp/37f6f50a45fc31c1a5ad25010fff681a8ce645b8/gsm.csv", verbose=False)
-```
-
-Note that CleverCSV is a bit slower than the Python Sniffer. This is the focus 
-of our ongoing development efforts and is also affected by running Python 
-through Jupyter. But let's not forget that at least CleverCSV is correct!
-
-## Conclusion
-
-Below are some more examples, but I think you'll get the idea by now. 
-CleverCSV is much more robust against messy CSV files and is an easy to use 
-drop-in replacement for the Python csv module. Just replace ``import csv`` by 
-``import ccsv`` in your code!
-
-We're still working on adding some more features to CleverCSV and speeding up 
-and improving the dialect detection algorithm. One of the novel features that 
-we added is a ``clevercsv`` command line executable with the following 
-commands:
-
-- ``detect`` to run dialect detection directly from the command line
-
-- ``view`` to open a CSV file in a table viewer after automatic detection of 
-  the dialect
-
-- ``standardize`` to convert a CSV file in a messy format to the standard CSV 
-  format
-
-
-We hope you find CleverCSV useful! If you encounter any issues or files where 
-CleverCSV fails, please leave a comment on GitHub.
-
-## Further Examples
-
-
-```python
-# No result from Python (note that this file says it uses "|" as separator, but actually uses ","!)
-compare("https://raw.githubusercontent.com/queq/just-stuff/c1b8714664cc674e1fc685bd957eac548d636a43/pov/TopFixed/build/project_r_pad.csv", n_preview=30)
-```
-
-```python
-# Python says '\r' (carriage return) is the delimiter!
 compare("https://raw.githubusercontent.com/HAYASAKA-Ryosuke/TodenGraphDay/8f052219d037edabebd488e5f6dc2ddbe8367dc1/juyo-j.csv")
 ```
 
-```python
-# No result from Python csv
-compare("https://raw.githubusercontent.com/philipmcg/minecraft-service-windows/774892ff0c27a76b6db20ba3750149c19b7a3351/MinecraftService/MinecraftService/gcsv_sample.csv")
-```
+Sniffer says ``\r`` (carriage return) is the delimiter!
 
-```python
-# Incorrect delimiter from Python csv
-compare("https://raw.githubusercontent.com/OptimusGitEtna/RestSymf/635e4ad8a288cde64b306126c986213de71a4f4a/Python-3.4.2/Doc/tools/sphinxext/susp-ignored.csv")
-```
+## Conclusion
+
+We hope you find CleverCSV useful! The package is still in beta, so if you 
+encounter any issues or files where CleverCSV fails, please leave a comment on 
+GitHub!
