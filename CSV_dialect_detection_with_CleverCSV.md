@@ -74,7 +74,7 @@ approaches, and it is therefore robust against these kinds of format
 variations. It even has a wrapper that works with DataFrames!
 
 ```python
-from ccsv.wrappers import csv2df
+from clevercsv import csv2df
 
 df = csv2df('./data/imdb.csv')
 df
@@ -110,7 +110,7 @@ We'll define some functions for easy comparisons.
 
 ```python
 import csv
-import ccsv
+import clevercsv
 import io
 import os
 import requests
@@ -148,10 +148,10 @@ def detect_url(content, verbose=True):
     """ Utility to run the CleverCSV detector on a CSV file at a URL """
     # We have designed CleverCSV to be a drop-in replacement for the CSV module
     try:
-        dialect = ccsv.Sniffer().sniff(content, verbose=verbose)
+        dialect = clevercsv.Sniffer().sniff(content, verbose=verbose)
         print("CleverCSV detected: delimiter = %r, quotechar = %r" % (dialect.delimiter, 
                                                                       dialect.quotechar))
-    except ccsv.Error:
+    except clevercsv.Error:
         print(colored("No result from CleverCSV", "red"))
 
 def pandas_url(content):
@@ -170,7 +170,7 @@ def pandas_url(content):
 
 def compare(input_, verbose=False, n_preview=10):
     if os.path.exists(input_):
-      enc = ccsv.utils.get_encoding(input_)
+      enc = clevercsv.utils.get_encoding(input_)
       content = open(input_, 'r', newline='', encoding=enc).read()
     else:
       content = page(input_)
