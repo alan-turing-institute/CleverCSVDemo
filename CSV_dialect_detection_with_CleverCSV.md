@@ -89,7 +89,7 @@ patterns of row lengths in the parsing result and the data type of the
 resulting cells.  This mimicks how a human would identify the dialect. If 
 you're wondering why this problem is hard, it's because every dialect will 
 give you *some* table, but not necessarily the correct one. More details can 
-be found [in the paper](https://arxiv.org/abs/1811.11242).
+be found [in the paper](https://rdcu.be/bLVur).
 
 ## Other Examples
 
