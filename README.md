@@ -1,6 +1,6 @@
 # CleverCSV Demonstration
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alan-turing-institute/CleverCSVDemo/master?filepath=CSV_dialect_detection_with_CleverCSV.ipynb)
+Click this button to access the demo: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alan-turing-institute/CleverCSVDemo/master?filepath=CSV_dialect_detection_with_CleverCSV.ipynb)
 
 This repository contains a demonstration of 
 [CleverCSV](https://github.com/alan-turing-institute/CleverCSV), a Python 
