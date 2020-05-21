@@ -74,9 +74,9 @@ approaches, and it is therefore robust against these kinds of format
 variations. It even has a wrapper that works with DataFrames!
 
 ```python
-from clevercsv import csv2df
+from clevercsv import read_dataframe
 
-df = csv2df('./data/imdb.csv')
+df = read_dataframe('./data/imdb.csv')
 df
 ```
 
