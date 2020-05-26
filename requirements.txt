@@ -1,3 +1,4 @@
 clevercsv>=0.2.0
 requests
 termcolor
+pandas
